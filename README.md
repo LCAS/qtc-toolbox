@@ -14,20 +14,28 @@ qtc-toolbox
 # Existing functions 
 
  * `qtc2case` converts a given QTC sequence matrix into a one-dimensional stream of case identifiers (numbered 1-49)
- * `qtcTransProb` computes the transition probabilities of a set of QTC sequences to form a Markov model with added start and end states
+ * `qtc2hmm` computes the transition probabilities of a set of QTC sequences to form a Markov model with added start and end states. Uses the standard Matlab HMM functions. 
  * `qtcDist` computes the QTC edit distance between either all pairs in a set (when invoked with one arg) or two explicitly given sequences
- * `qtcMostProbableTrace` takes the output of `qtcTransProb` and computes the a-priori most probable trace
+ * `qtcMarkovDot` create a visualisation in GraphViz of the transition probablilities
+ * `qtcSeqDecode` can compute the likelihood of a given sequence allowing for automatic classification
 
-to then generate a graph using GraphViz, use something like this
+Some useful case:
+
+*plot*
 
 ```
-	[ct,labels]=qtcTransProb(qtcc(6:end));
-	adj=zeros(size(ct)+1);
-	adj(1:end-1,2:end)=ct;
-	l=labels(:,1);
-	l{end+1}='E';
-	al=num2cell(adj);
-	graph_to_dot(adj,'node_label',l,'arc_label',al)
-	! dot -Tps tmp.dot > out.ps
-	! open out.ps
+% create without pseudo state transitions (useful for plotting)
+hmm=qtc2hmm(overtake_ns,0.0)
+qtcMarkovDot(hmm)
+! dot -Tps tmp.dot > out.ps
+
+```
+
+*classifiy*
+
+```
+% create with pseudo transitions
+hmm=qtc2hmm(overtake_ns)
+% compute the likelihood for a given sequnce:
+qtcSeqDecode(hmm,overtake_s{4})
 ```
