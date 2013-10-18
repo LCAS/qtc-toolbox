@@ -17,7 +17,7 @@ end;
 d=zeros(83,83);
 for i1=1:size(qtc,1)
 	for i2=1:size(qtc,1)
-		d(i1+1,i2+1)=sum(abs(qtc(i1,:)-qtc(i2,:)));
+		d(i1+1,i2+1)=max(abs(qtc(i1,:)-qtc(i2,:)));
 	end;
 end;
 validtr=double(d==1);
