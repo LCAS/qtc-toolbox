@@ -30,6 +30,7 @@ for i = 1:2:nargin-1              % get optional args
         case 'height', height = varargin{i+1};
         case 'leftright', leftright = varargin{i+1};
         case 'directed', directed = varargin{i+1};
+        case 'nodewgt', nodewgt= varargin{i+1};
     end
 end
 fid = fopen(filename, 'w');
@@ -60,7 +61,7 @@ for node = 1:Nnds               % process NODEs
     if isempty(node_label)
         fprintf(fid, '%d;\n', node);
     else
-        fprintf(fid, '%d [ label = "%s" ];\n', node, node_label{node});
+        fprintf(fid, '%d [ label = "%s", style="filled", fillcolor = "0.0 %2.2f 1.0" ];\n', node, node_label{node}, min(1,nodewgt(node)));
     end
 end
 edgeformat = strcat(['%d ',arctxt,' %d ',labeltxt,';\n']);
