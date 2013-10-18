@@ -6,7 +6,7 @@ function [ output_args ] = qtcMarkovDot( hmm, th)
     %threshold it
     
     adj(find(adj<th))=0;
-    ix=find(sum(adj(:,2:end))<th)
+    ix=find(sum(adj(:,2:end))<th);
     adj(ix+1,:)=0;
     
     stIncl=unique([1; intersect(find(sum(adj)>th)', find(sum(adj,2)>th))], 'stable');

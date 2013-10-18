@@ -5,7 +5,7 @@ function [ newhmm ] = qtcTrainHmm( CND, qtcc, skip )
         skip=1;
     end;
     s=qtcSeq(qtcc,skip);
-    [newhmm.t,newhmm.e]=hmmtrain(s,CND.t,CND.e);
+    [newhmm.t,newhmm.e]=hmmtrain(s,CND.t,CND.e,'PSEUDOTRANSITIONS',CND.t*1e-15,'PSEUDOEMISSIONS',CND.e*1e-15,'VERBOSE',true,'MAXITERATIONS',50);
 
 end
 
