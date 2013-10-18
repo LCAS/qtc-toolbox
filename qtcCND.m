@@ -32,7 +32,9 @@ validtr=validtr+eye(83,83)*0.00001;
 validtr(1,1)=0;
 t=validtr./repmat(sum(validtr,2),1,size(validtr,2));
 
-emmissions=ones(83,83)*(0.001/82)+eye(83,83)*0.999;
+%emmissions=ones(83,83)*(0.001/82)+eye(83,83)*0.999;
+emmissions=eye(83,83);
+
 emmissions(1,2:end)=0;
 %emmissions(end,1:end-1)=0.0001;
 emmissions=emmissions./repmat(sum(emmissions,2),1,size(emmissions,2));
