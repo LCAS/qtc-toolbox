@@ -1,4 +1,4 @@
-function [tr,p]=qtcMostProbableTrace(ct);
+function [tr,p]=qtcMostProbableTrace(ct)
 
 s=1;
 tr=1;
