@@ -1,7 +1,4 @@
 function hmm = qtcCND;
-% validtr=zeros(81,81);
-
-% [c,from]=qtc2case([-1 -1 -1 -1]);
 
 qtc=[];
 for i1=1:3
@@ -14,113 +11,49 @@ for i1=1:3
 	end;
 end;
 
+% Find valid transitions
+% Valid transitions are represented by a 1 in d; 0 or 2 are invalid
 validqtc=[];
-
 d=zeros(83,83);
 for i1=1:size(qtc,1)
-	for i2=1:size(qtc,1)
-		d(i1+1,i2+1)=max(abs(qtc(i1,:)-qtc(i2,:)));
+    for i2=1:size(qtc,1)
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % e.g. -0 to 0-        
-        if d(i1+1,i2+1)==1
-            if sum(abs(qtc(i1,1:2)))==1 & sum(abs(qtc(i2,1:2)))==1
-                if max(abs(qtc(i1,1:2)-qtc(i2,1:2))) > 0 & sum(qtc(i1,1:2)-qtc(i2,1:2))==0
-                    d(i1+1,i2+1)=2;
-                end
-            end
-        end
-        if d(i1+1,i2+1)==1
-            if sum(abs(qtc(i1,3:4)))==1 & sum(abs(qtc(i2,3:4)))==1
-                if max(abs(qtc(i1,3:4)-qtc(i2,3:4))) > 0 & sum(qtc(i1,3:4)-qtc(i2,3:4))==0
-                    d(i1+1,i2+1)=2;
-                end
-            end
-        end
+        % self transition = 0, transition form - to + and vice versa = 2
+        % transitions from - to 0 or + to 0 and vice versa = 1
+        d(i1+1,i2+1)=max(abs(qtc(i1,:)-qtc(i2,:)));
+        
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % e.g. -0 to 0+
+        % find invalid transitions according to CND:
+        % 1,2: -000 <> 0-00 | +000 <> 0+00 | -000 <> 0+00 | +000 <> 0-00
+        % 1,3: -000 <> 00-0 | +000 <> 00+0 | -000 <> 00+0 | +000 <> 00-0
+        % 1,4: -000 <> 000- | +000 <> 000+ | -000 <> 000+ | +000 <> 000-
+        % 2,3: 0-00 <> 00-0 | 0+00 <> 00+0 | 0-00 <> 00+0 | 0+00 <> 00-0
+        % 2,4: 0-00 <> 000- | 0+00 <> 000+ | 0-00 <> 000+ | 0+00 <> 000-
+        % 3,4: 00-0 <> 000- | 00+0 <> 000+ | 00-0 <> 000+ | 00+0 <> 000-
         if d(i1+1,i2+1)==1
-            if sum(abs(qtc(i1,1:2)))==1 & sum(abs(qtc(i2,1:2)))==1
-                if max(abs(qtc(i1,1:2)-qtc(i2,1:2))) > 0 & abs(sum(qtc(i1,1:2)-qtc(i2,1:2)))==2
-                    d(i1+1,i2+1)=2;
+            for j1=1:size(qtc(i1,:),2)-1
+                for j2=j1+1:size(qtc(i2,:),2)
+                    if sum(abs(qtc(i1,[j1,j2])))==1 ...
+                            & sum(abs(qtc(i2,[j1,j2])))==1
+                        if max(abs(qtc(i1,[j1,j2])-qtc(i2,[j1,j2]))) > 0 ...
+                                & sum(qtc(i1,[j1,j2])-qtc(i2,[j1,j2]))~=1
+                            d(i1+1,i2+1)=2;
+                            break;
+                        end
+                    end
+                end
+                if d(i1+1,i2+1) ~= 1
+                    break;
                 end
             end
         end
+        % Create list of valid transitions
         if d(i1+1,i2+1)==1
-            if sum(abs(qtc(i1,3:4)))==1 & sum(abs(qtc(i2,3:4)))==1
-                if max(abs(qtc(i1,3:4)-qtc(i2,3:4))) > 0 & abs(sum(qtc(i1,3:4)-qtc(i2,3:4)))==2
-                    d(i1+1,i2+1)=2;
-                end
-            end
+            validqtc(end+1,:)=[qtc(i1,:), 5 ,qtc(i2,:)];
         end
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % e.g. ++0+ to 0+++
-        if d(i1+1,i2+1)==1
-            if sum(abs(qtc(i1,[1,3])))==1 & sum(abs(qtc(i2,[1,3])))==1
-                if max(abs(qtc(i1,[1,3])-qtc(i2,[1,3]))) > 0 & sum(qtc(i1,[1,3])-qtc(i2,[1,3]))==0
-                    d(i1+1,i2+1)=2;
-                end
-            end
-        end
-        if d(i1+1,i2+1)==1
-            if sum(abs(qtc(i1,[2,4])))==1 & sum(abs(qtc(i2,[2,4])))==1
-                if max(abs(qtc(i1,[2,4])-qtc(i2,[2,4]))) > 0 & sum(qtc(i1,[2,4])-qtc(i2,[2,4]))==0
-                    d(i1+1,i2+1)=2;
-                end
-            end
-        end
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % e.g. ++0+ to 0+-+
-        if d(i1+1,i2+1)==1
-            if sum(abs(qtc(i1,[1,3])))==1 & sum(abs(qtc(i2,[1,3])))==1
-                if max(abs(qtc(i1,[1,3])-qtc(i2,[1,3]))) > 0 & abs(sum(qtc(i1,[1,3])-qtc(i2,[1,3])))==2
-                    d(i1+1,i2+1)=2;
-                end
-            end
-        end
-        if d(i1+1,i2+1)==1
-            if sum(abs(qtc(i1,[2,4])))==1 & sum(abs(qtc(i2,[2,4])))==1
-                if max(abs(qtc(i1,[2,4])-qtc(i2,[2,4]))) > 0 & abs(sum(qtc(i1,[2,4])-qtc(i2,[2,4])))==2
-                    d(i1+1,i2+1)=2;
-                end
-            end
-        end
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % e.g. 00-0 to 0-00
-        if d(i1+1,i2+1)==1
-            if sum(abs(qtc(i1,[2,3])))==1 & sum(abs(qtc(i2,[2,3])))==1
-                if max(abs(qtc(i1,[2,3])-qtc(i2,[2,3]))) > 0 & sum(qtc(i1,[2,3])-qtc(i2,[2,3]))==0
-                    d(i1+1,i2+1)=2;
-                end
-            end
-        end
-        if d(i1+1,i2+1)==1
-            if sum(abs(qtc(i1,[1,4])))==1 & sum(abs(qtc(i2,[1,4])))==1
-                if max(abs(qtc(i1,[1,4])-qtc(i2,[1,4]))) > 0 & sum(qtc(i1,[1,4])-qtc(i2,[1,4]))==0
-                    d(i1+1,i2+1)=2;
-                end
-            end
-        end
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % e.g. 00+0 to 0-00
-        if d(i1+1,i2+1)==1
-            if sum(abs(qtc(i1,[2,3])))==1 & sum(abs(qtc(i2,[2,3])))==1
-                if max(abs(qtc(i1,[2,3])-qtc(i2,[2,3]))) > 0 & abs(sum(qtc(i1,[2,3])-qtc(i2,[2,3])))==2
-                    d(i1+1,i2+1)=2;
-                end
-            end
-        end
-        if d(i1+1,i2+1)==1
-            if sum(abs(qtc(i1,[1,4])))==1 & sum(abs(qtc(i2,[1,4])))==1
-                if max(abs(qtc(i1,[1,4])-qtc(i2,[1,4]))) > 0 & abs(sum(qtc(i1,[1,4])-qtc(i2,[1,4])))==2
-                    d(i1+1,i2+1)=2;
-                end
-            end
-        end
-        if d(i1+1,i2+1)==1
-            validqtc(end+1,:)=[qtc(i1,:), 9 ,qtc(i2,:)];
-        end
-	end;
-end;
+    end
+end
+
 validtr=double(d==1);
 
 validtr(1,:)=1;
@@ -136,9 +69,9 @@ t=validtr./repmat(sum(validtr,2),1,size(validtr,2));
 %emmissions=ones(83,83)*(0.001/82)+eye(83,83)*0.999;
 emmissions=eye(83,83);
 
-emmissions(1,2:end)=0;
+% emmissions(1,2:end)=0;
 %emmissions(end,1:end-1)=0.0001;
-emmissions=emmissions./repmat(sum(emmissions,2),1,size(emmissions,2));
+% emmissions=emmissions./repmat(sum(emmissions,2),1,size(emmissions,2));
 
 hmm.t=t;
 hmm.e=emmissions;
