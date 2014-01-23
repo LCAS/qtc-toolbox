@@ -1,22 +1,55 @@
-function hmm = qtcCND;
+function hmm = qtcCND(varargin)
+
+qtctype = 2;
+
+nVarargs = length(varargin);
+for i=1:nVarargs
+    if strcmp(varargin{i}, 'type')
+        if i+1 > nVarargs
+            disp(['ERROR: Missing input after ', varargin{i}])
+            return;
+        end
+        if strcmp(varargin{i+1}, 'qtcc')
+            qtctype = 2;
+            i = i + 1;
+        elseif strcmp(varargin{i+1}, 'qtcb')
+            qtctype = 1;
+            i = i + 1;
+        end
+    end
+end
 
 qtc=[];
-for i1=1:3
-	for i2=1:3
-		for i3=1:3
-			for i4=1:3
-				qtc(end+1,:)=[i1-2 i2-2 i3-2 i4-2];
-			end;
-		end;
-	end;
-end;
+if qtctype == 1
+    for i1=1:3
+        for i2=1:3
+            qtc(end+1,:)=[i1-2 i2-2];
+        end
+    end
+elseif qtctype == 2
+    for i1=1:3
+        for i2=1:3
+            for i3=1:3
+                for i4=1:3
+                    qtc(end+1,:)=[i1-2 i2-2 i3-2 i4-2];
+                end
+            end
+        end
+    end
+end
+
+if qtctype == 1
+    cndsize = 11;
+elseif qtctype == 2
+    cndsize = 83;
+end
 
 % Find valid transitions
 % Valid transitions are represented by a 1 in d; 0 or 2 are invalid
 validqtc=[];
-d=zeros(83,83);
+d=zeros(cndsize,cndsize);
 for i1=1:size(qtc,1)
-    for i2=1:size(qtc,1)
+    for i2=i1+1:size(qtc,1)
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % self transition = 0, transition form - to + and vice versa = 2
         % transitions from - to 0 or + to 0 and vice versa = 1
@@ -47,6 +80,7 @@ for i1=1:size(qtc,1)
                 end
             end
         end
+        d(i2+1,i1+1) = d(i1+1,i2+1);
         % Create list of valid transitions
         if d(i1+1,i2+1)==1
             validqtc(end+1,:)=[qtc(i1,:), 5 ,qtc(i2,:)];
@@ -62,16 +96,11 @@ validtr(:,end)=1;
 validtr(1,end)=0;
 validtr(end,:)=0;
 
-validtr=validtr+eye(83,83)*0.00001;
+validtr=validtr+eye(cndsize,cndsize)*0.00001;
 validtr(1,1)=0;
 t=validtr./repmat(sum(validtr,2),1,size(validtr,2));
 
-%emmissions=ones(83,83)*(0.001/82)+eye(83,83)*0.999;
-emmissions=eye(83,83);
-
-% emmissions(1,2:end)=0;
-%emmissions(end,1:end-1)=0.0001;
-% emmissions=emmissions./repmat(sum(emmissions,2),1,size(emmissions,2));
+emmissions=eye(cndsize,cndsize);
 
 hmm.t=t;
 hmm.e=emmissions;
