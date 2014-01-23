@@ -40,7 +40,7 @@ if directed
     if isempty(arc_label)
         labeltxt = '';
     else
-        labeltxt = '[label="%2.2f",penwidth="%d",weight="%d"]';
+        labeltxt = '[label="%2.2f",penwidth="%d",weight="%d", fontsize = 18]';
     end
 else
     fprintf(fid, 'graph G {\n');
@@ -48,7 +48,7 @@ else
     if isempty(arc_label)
         labeltxt = '[dir=none]';
     else
-        labeltext = '[label="%2.2f",penwidth="%d",weight="%d",dir=none]';
+        labeltext = '[label="%2.2f",penwidth="%d",weight="%d",dir=none, fontsize = 18]';
     end
 end
 fprintf(fid, 'center = 1;\n');
@@ -61,7 +61,7 @@ for node = 1:Nnds               % process NODEs
     if isempty(node_label)
         fprintf(fid, '%d;\n', node);
     else
-        fprintf(fid, '%d [ label = "%s", style="filled", fillcolor = "0.0 %2.2f 1.0" ];\n', node, node_label{node}, min(1,nodewgt(node)));
+        fprintf(fid, '%d [ label = "%s", style="filled", fillcolor = "0.0 0.0 %2.2f", fontsize = 25 ];\n', node, node_label{node}, 1-.5*min(1,nodewgt(node)));
     end
 end
 edgeformat = strcat(['%d ',arctxt,' %d ',labeltxt,';\n']);
