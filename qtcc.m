@@ -1,4 +1,4 @@
-function [ qtcc_rep, frames ] = qtcc( human, robot, accuracy, plot )
+function [ qtcc_rep, frames ] = qtcc( human, robot, accuracy, varargin )
 %QTCC Summary of this function goes here
 %   Creates (and plots) a QTC_C sequence from a given vector of points.
 %   human and robot are x,y column vectors, accuracy is the distance to the
@@ -6,7 +6,18 @@ function [ qtcc_rep, frames ] = qtcc( human, robot, accuracy, plot )
 %   plot = 1 turns on visualisation and saves them as framjes in frame to
 %   be replayed afterwards.
 
-qtcc_rep_tmp = [0 0 0 0];
+plot = 0; collaps = 1;
+nVarargs = length(varargin);
+for i=1:nVarargs
+    if strcmp(varargin{i}, 'plot')
+        plot = 1;
+    elseif strcmp(varargin{i}, 'nocollaps')
+        collaps = 0;
+    end
+end
+
+
+qtcc_rep_tmp = [];
 
 end_idx = size(human,1);
 if size(human,1) ~= size(robot,1)
@@ -96,7 +107,7 @@ for i=2:end_idx
     qtcc_rep_tmp = [qtcc_rep_tmp; [l(1,1) k(1,1) l(1,2) k(1,2)]];
     
     % plot
-    if nargin == 4 & plot == 1
+    if plot == 1
         qtcPlotPoses(human(i-1:i,:), robot(i-1:i,:), 2, 1, 1)
         axis equal
         line_rl = line(RL_ext(:,1), RL_ext(:,2), 'Color', 'm');
@@ -127,13 +138,17 @@ if size(qtcc_rep_tmp,1) == 1
     return;
 end
 
-qtcc_rep = qtcc_rep_tmp(1,:);
-j = 1;
-for i=2:size(qtcc_rep_tmp,1)
-    if(~isequal(qtcc_rep(j,:), qtcc_rep_tmp(i,:)))
-        qtcc_rep = [qtcc_rep; qtcc_rep_tmp(i,:)];
-        j = j + 1;
+if collaps
+    qtcc_rep = qtcc_rep_tmp(1,:);
+    j = 1;
+    for i=2:size(qtcc_rep_tmp,1)
+        if(~isequal(qtcc_rep(j,:), qtcc_rep_tmp(i,:)))
+            qtcc_rep = [qtcc_rep; qtcc_rep_tmp(i,:)];
+            j = j + 1;
+        end
     end
+else
+    qtcc_rep = qtcc_rep_tmp;
 end
 
 end
