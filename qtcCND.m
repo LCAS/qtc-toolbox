@@ -11,9 +11,15 @@ for i=1:nVarargs
         end
         if strcmp(varargin{i+1}, 'qtcc')
             qtctype = 2;
+            cndsize = 83;
             i = i + 1;
         elseif strcmp(varargin{i+1}, 'qtcb')
             qtctype = 1;
+            cndsize = 11;
+            i = i + 1;
+        elseif strcmp(varargin{i+1}, 'combined')
+            qtctype = 3;
+            cndsize = 92;
             i = i + 1;
         end
     end
@@ -36,12 +42,21 @@ elseif qtctype == 2
             end
         end
     end
-end
-
-if qtctype == 1
-    cndsize = 11;
-elseif qtctype == 2
-    cndsize = 83;
+elseif qtctype == 3
+    for i1=1:3
+        for i2=1:3
+            qtc(end+1,:)=[i1-2 i2-2 0 0];
+        end
+    end
+    for i1=1:3
+        for i2=1:3
+            for i3=1:3
+                for i4=1:3
+                    qtc(end+1,:)=[i1-2 i2-2 i3-2 i4-2];
+                end
+            end
+        end
+    end
 end
 
 % Find valid transitions
