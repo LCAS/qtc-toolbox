@@ -29,9 +29,10 @@ for i=1:size(qtcc,1)
                    continue; 
                 end
             end
-            tmp = [tmp; qtcc(i,1:2)];
-            
         end
+        tmp = [tmp; qtcc(i,1:2)];
+            
+        
     else
         if ~isempty(tmp) & size(tmp,2) ~= 4
             qtc_rep{end+1,1} = tmp;
@@ -42,13 +43,13 @@ for i=1:size(qtcc,1)
                     continue;
                 end
             end
-            tmp = [tmp; qtcc(i,:)];
-            
         end
+        tmp = [tmp; qtcc(i,:)];
+            
+        
     end
 end
 qtc_rep{end+1,1} = tmp;
-
 
 end
 
