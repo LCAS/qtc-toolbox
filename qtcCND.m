@@ -1,7 +1,7 @@
 function hmm = qtcCND(varargin)
 
 qtctype = 2;
-
+cndsize = 83;
 nVarargs = length(varargin);
 for i=1:nVarargs
     if strcmp(varargin{i}, 'type')
