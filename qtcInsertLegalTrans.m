@@ -1,4 +1,4 @@
-function [ real_qtc_rep ] = qtcInsertLegalTrans( qtc_rep )
+function [ legal_qtc_rep ] = qtcInsertLegalTrans( qtc_rep )
 %QTCINSERTLEGALTRANS 
 %   Inserts zero Transitions to create legal QTC state chains. Works for
 %   QTC_b and QTC_c.
@@ -6,24 +6,41 @@ function [ real_qtc_rep ] = qtcInsertLegalTrans( qtc_rep )
 %   LEGAL_QTC_REP = QTCINSERTLEGALTRANS(QTC_REP) insert transition states
 %   into the original QTC representation and return new representation.
 %   QTC_REP and LEGAL_QTC_REP are matrixes, e.g. [q1 q2 q3 q4; ...] for
-%   QTC_c. If QTC_REP is a (nested) cell aray, LEGAL_QTC_REP will also be a cell
+%   QTC_c. If QTC_REP is a cell aray, LEGAL_QTC_REP will also be a cell
 %   array of size [LENGTH(QTC_REP),1].
 
 if iscell(qtc_rep)
-    real_qtc_rep = {};
+    legal_qtc_rep = {};
     for i=1:length(qtc_rep)
-        real_qtc_rep{i,1} = qtcInsertLegalTrans(qtc_rep{i});
+        legal_qtc_rep{i,1} = qtcInsertLegalTrans(qtc_rep{i});
+        if i > 1
+            if iscell(legal_qtc_rep{i-1,1}) | iscell(legal_qtc_rep{i,1})
+                error('qtc-toolbox:qtcInsertLegalTrans:%s','no nested cells allowed.')
+            end
+            diff = length(legal_qtc_rep{i-1,1}(end,:)) - length(legal_qtc_rep{i,1}(1,:));
+            if diff > 0
+                test1 = [legal_qtc_rep{i-1,1}(end,:); ...
+                    [legal_qtc_rep{i,1}(1,:), zeros(1, diff)]];
+            else
+                test1 = [[legal_qtc_rep{i-1,1}(end,:), zeros(1, -diff); ...
+                    legal_qtc_rep{i,1}(1,:)]];
+            end
+            test2 = qtcInsertLegalTrans(test1);
+            if ~isequal(test1,test2)
+                legal_qtc_rep{i-1,1}(end+1,:) = test2(2,1:size(legal_qtc_rep{i-1,1},2));
+            end
+        end
     end
     return;
 end
 
 if size(qtc_rep,1) <= 1
     warning('qtc-toolbox:qtcInsertLegalTrans:%s', 'Just one or less data points in qtc rep')
-    real_qtc_rep = qtc_rep;
+    legal_qtc_rep = qtc_rep;
     return;
 end
 
-real_qtc_rep = qtc_rep(1,:);
+legal_qtc_rep = qtc_rep(1,:);
 
 for i=2:size(qtc_rep,1)
     insert = qtc_rep(i,:);
@@ -54,9 +71,9 @@ for i=2:size(qtc_rep,1)
     end
 
     if ~isequal(insert,qtc_rep(i,:))
-        real_qtc_rep = [real_qtc_rep; insert];
+        legal_qtc_rep = [legal_qtc_rep; insert];
     end
-    real_qtc_rep = [real_qtc_rep; qtc_rep(i,:)];
+    legal_qtc_rep = [legal_qtc_rep; qtc_rep(i,:)];
 end
 
 end
