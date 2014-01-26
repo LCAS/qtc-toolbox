@@ -1,6 +1,15 @@
 function [ qtc_rep ] = qtcHierarchicalRepr( qtcc, distances, threshold )
-%QTCHIERARCHICALREPRESENTATION Summary of this function goes here
-%   Detailed explanation goes here
+%QTCHIERARCHICALREPRESENTATION
+%   Uses a qtc_c state sequence and the distances between the two agents to
+%   to either reduce qtc_c to qtc_b or leave it as it is. Collapses equal
+%   adjacent states afterwards and returns a cell araay of qtc_b and qtc_c
+%   descriptions.
+%
+%   QTC_REP = QTCHIERARCHICALREPRESENTATION(QTCC, DISTANCES, THRESHOLD)
+%   Takes a column matrix of QTCC states, a column vector of according 
+%   DISTANCES (has to be same length as qtcc matrix), and a THRESHOLD. 
+%   qtc_c states will be reduced to qtc_b if distance is > THRESHOLD.
+%   Returns a cell araay of the resulting qtc_b and qtc_c sequences.
 
 if size(qtcc,1)~=size(distances,1)
     error('qtc-toolbox:qtcHierarchicalRepr:%s','qtcc and distances must have the same length')
@@ -10,7 +19,6 @@ qtc_rep = {};
 
 tmp = [];
 for i=1:size(qtcc,1)
-    qtcc(i,:)
     if distances(i,1) > threshold
         if ~isempty(tmp) & size(tmp,2) ~= 2
             qtc_rep{end+1,1} = tmp;
