@@ -1,10 +1,26 @@
-function [ p ] = crossValidation( data_set, control, mode, KorP )
-%CROSSVALIDATION Summary of this function goes here
-%   Detailed explanation goes here
+function [ p ] = qtcCrossValidation( data_set, control, mode, KorP )
+%QTCCROSSVALIDATION
+%   Uses cross validation to evaluate the difference between the given
+%   DATA_SET and the CONTROL. Returns classification probabilities.
+%
+%   P = QTCCROSSVALIDATION(DATA_SET, CONTROL, MODE, KORP) generates HMM
+%   representations of DATA_SET and CONTROL and returns classification
+%   rates for DATA_SET using CONTROL as a control. DATA_SET and CONTROL are
+%   column matrixes. Set MODE to 'Kfold' or 'HoldOut'. See below for KORP
+%   description.
+%
+%   Kfold: Uses KORP for number of iterations. Default KORP = 5. Devides
+%   DATA_SET into KORP number of sets and uses each as a test set in a
+%   separate test run.
+%
+%   HoldOut: Uses KORP as the percentage of DATA_SET for the test set.
+%   Default KORP = .5. Only runs once.
 
-cnd = qtcCND;
-tmp_rate = [];
-errors = [];
+if size(data_set,2) == 2
+    cnd = qtcCND('type','qtcb');
+elseif size(data_set,2) == 4
+    cnd = qtcCND('type','qtcc');
+end
 
 if strcmp(mode,'Kfold')
     disp('---------------------------------------------------------------')
@@ -34,17 +50,6 @@ if strcmp(mode,'Kfold')
         result = [[res_test.problog]' [res_control.problog]'];
         [m,idx]=max(result');
         p = [p, nnz(idx==1)/length(idx)];
-        
-        
-        % evaluation
-%         sample = [res_test.problog]';
-%         training = [[res_train.problog]'; [res_contr.problog]'];
-%         group = [ones(length(res_train),1);repmat(2,length(res_contr),1)];
-%         [class, error]=classify(sample,training,group,'diaglinear');
-%         errors = [errors, error];
-%         cr = nnz(class == 1)/length(test_set);
-%         disp(['classification rate = ',num2str(cr)])
-%         tmp_rate = [tmp_rate; cr]; 
         disp('---------------------------------------------------------------')
     end
 elseif strcmp(mode,'HoldOut')
@@ -55,32 +60,25 @@ elseif strcmp(mode,'HoldOut')
         disp(['p = ',num2str(KorP)])
     else
         [Train, Test] = crossvalind('HoldOut', length(data_set));
-        disp('k = 0.5')
+        disp('p = 0.5')
     end
     disp('---------------------------------------------------------------')
     test_set = data_set(Test);
     training_set = data_set(Train);
 
     % data
+    hmm_control = qtcTrainHmm(cnd, control);
+    p = [];
     hmm_test=qtcTrainHmm(cnd, training_set);
     res_test=qtcSeqDecode(hmm_test, test_set);
-    res_train=qtcSeqDecode(hmm_test, training_set);
 
     % control
-    res_contr = qtcSeqDecode(hmm_test, control);
-
-    % evaluation
-    sample = [res_test.problog]';
-    training = [[res_train.problog]'; [res_contr.problog]'];
-    group = [ones(length(res_train),1);repmat(2,length(res_contr),1)];
-    [class, error]=classify(sample,training,group);
-    errors = [errors, error];
-    tmp_rate = nnz(class == 1)/length(test_set);
+    res_control = qtcSeqDecode(hmm_control, test_set);
+    result = [[res_test.problog]' [res_control.problog]'];
+    [m,idx]=max(result');
+    p = [p, nnz(idx==1)/length(idx)];
+    disp('---------------------------------------------------------------')
 end
-
-% class_rate = mean(tmp_rate);
-% disp('---------------------------------------------------------------')
-% disp(['classification rate = ',num2str(class_rate)])
 
 end
 
