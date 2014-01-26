@@ -6,7 +6,16 @@ function [ real_qtc_rep ] = qtcInsertLegalTrans( qtc_rep )
 %   LEGAL_QTC_REP = QTCINSERTLEGALTRANS(QTC_REP) insert transition states
 %   into the original QTC representation and return new representation.
 %   QTC_REP and LEGAL_QTC_REP are matrixes, e.g. [q1 q2 q3 q4; ...] for
-%   QTC_c.
+%   QTC_c. If QTC_REP is a (nested) cell aray, LEGAL_QTC_REP will also be a cell
+%   array of size [LENGTH(QTC_REP),1].
+
+if iscell(qtc_rep)
+    real_qtc_rep = {};
+    for i=1:length(qtc_rep)
+        real_qtc_rep{i,1} = qtcInsertLegalTrans(qtc_rep{i});
+    end
+    return;
+end
 
 if size(qtc_rep,1) <= 1
     warning('qtc-toolbox:qtcInsertLegalTrans:%s', 'Just one or less data points in qtc rep')
