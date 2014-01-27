@@ -1,4 +1,4 @@
-function [ output_args ] = qtcMarkovDot( hmm, th)
+function [ output_args ] = qtcMarkovDot( hmm, th, type)
     if nargin<4
         fn='tmp.dot';
     end;
@@ -16,7 +16,7 @@ function [ output_args ] = qtcMarkovDot( hmm, th)
     %[ri,ci]=find(a<th);
     %a(ri,ci)=0;
     
-    ql=qtcCase2Label(stIncl-1);
+    ql=qtcCase2Label(stIncl-1, type);
     t={'S' ql{2:end-1} 'E'};
     al=num2cell(a);
     ap=sum(a);
