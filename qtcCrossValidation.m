@@ -3,12 +3,12 @@ function [ p ] = qtcCrossValidation( data_set, control, mode, type, KorP )
 %   Uses cross validation to evaluate the difference between the given
 %   DATA_SET and the CONTROL. Returns classification probabilities.
 %
-%   P = QTCCROSSVALIDATION(DATA_SET, CONTROL, MODE, TYPE, KORP) generates HMM
+%   P = QTCCROSSVALIDATION(DATA_SET, CONTROL) generates HMM
 %   representations of DATA_SET and CONTROL and returns classification
 %   rates for DATA_SET using CONTROL as a control. DATA_SET and CONTROL are
-%   column matrixes. Set MODE to 'Kfold' or 'HoldOut'. TYPE has to be 
-%   'qtcb', 'qtcc,' or 'combined' dependign on what you want to do.See below 
-%   for KORP description.
+%   column matrixes. 
+%
+%   P = QTCCROSSVALIDATION(..., MODE) Set MODE to 'Kfold' or 'HoldOut'.
 %
 %   Kfold: Uses KORP for number of iterations. Default KORP = 5. Devides
 %   DATA_SET into KORP number of sets and uses each as a test set in a
@@ -16,6 +16,17 @@ function [ p ] = qtcCrossValidation( data_set, control, mode, type, KorP )
 %
 %   HoldOut: Uses KORP as the percentage of DATA_SET for the test set.
 %   Default KORP = .5. Only runs once.
+%
+%   P = QTCCROSSVALIDATION(..., TYPE)  TYPE has to be 'qtcb', 'qtcc,' or 
+%   'combined' dependign on what you want to do.See below for KORP 
+%   description.
+
+if isempty(type)
+    cnd = qtcCND('type','qtcc');
+end
+if isempty(mode)
+    mode = 'Kfold';
+end
 
 if strcmp(type,'qtcb')
     cnd = qtcCND('type','qtcb');
@@ -46,10 +57,10 @@ if strcmp(mode,'Kfold')
         
         % data
         hmm_test=qtcTrainHmm(cnd, training_set, type);
-        res_test=qtcSeqDecode(hmm_test, test_set);
+        res_test=qtcSeqDecode(hmm_test, test_set, type);
         
         % control
-        res_control = qtcSeqDecode(hmm_control, test_set);
+        res_control = qtcSeqDecode(hmm_control, test_set, type);
         result = [[res_test.problog]' [res_control.problog]'];
         [m,idx]=max(result');
         p = [p, nnz(idx==1)/length(idx)];
@@ -73,10 +84,10 @@ elseif strcmp(mode,'HoldOut')
     hmm_control = qtcTrainHmm(cnd, control, type);
     p = [];
     hmm_test=qtcTrainHmm(cnd, training_set, type);
-    res_test=qtcSeqDecode(hmm_test, test_set);
+    res_test=qtcSeqDecode(hmm_test, test_set, type);
 
     % control
-    res_control = qtcSeqDecode(hmm_control, test_set);
+    res_control = qtcSeqDecode(hmm_control, test_set, type);
     result = [[res_test.problog]' [res_control.problog]'];
     [m,idx]=max(result');
     p = [p, nnz(idx==1)/length(idx)];
