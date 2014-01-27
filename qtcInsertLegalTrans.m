@@ -64,7 +64,6 @@ for i=2:size(qtc_rep,1)
                 if max(abs(qtc_rep(i-1,[j1,j2])-insert(1,[j1,j2]))) > 0 ...
                         & sum(qtc_rep(i-1,[j1,j2])-insert(1,[j1,j2]))~=1
                     insert(1,[j1 j2]) = 0;
-                    break;
                 end
             end
         end
