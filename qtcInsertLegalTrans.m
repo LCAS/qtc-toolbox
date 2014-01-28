@@ -20,15 +20,19 @@ if iscell(qtc_rep)
             diff = length(legal_qtc_rep{i-1,1}(end,:)) - length(legal_qtc_rep{i,1}(1,:));
             if diff > 0
                 test1 = [legal_qtc_rep{i-1,1}(end,:); ...
-                    [legal_qtc_rep{i,1}(1,:), zeros(1, diff)]];
+                    [legal_qtc_rep{i,1}(1,:), nan(1, diff)]];
             else
-                test1 = [[legal_qtc_rep{i-1,1}(end,:), zeros(1, -diff); ...
+                test1 = [[legal_qtc_rep{i-1,1}(end,:), nan(1, -diff); ...
                     legal_qtc_rep{i,1}(1,:)]];
             end
             test2 = qtcInsertLegalTrans(test1);
-            if ~isequal(test1,test2)
+            if ~isequal(test1(~isnan(test1)),test2(~isnan(test2)))
+                test2(isnan(test2))=0;
                 legal_qtc_rep{i-1,1}(end+1,:) = test2(2,1:size(legal_qtc_rep{i-1,1},2));
             end
+        end
+        if sum(sum(isnan(legal_qtc_rep{i,1}))) > 0
+            1
         end
     end
     return;
@@ -69,7 +73,7 @@ for i=2:size(qtc_rep,1)
         end
     end
 
-    if ~isequal(insert,qtc_rep(i,:))
+    if ~isequal(insert(~isnan(insert)),qtc_rep(i,~isnan(insert)))
         legal_qtc_rep = [legal_qtc_rep; insert];
     end
     legal_qtc_rep = [legal_qtc_rep; qtc_rep(i,:)];

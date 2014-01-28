@@ -45,7 +45,7 @@ elseif qtctype == 2
 elseif qtctype == 3
     for i1=1:3
         for i2=1:3
-            qtc(end+1,:)=[i1-2 i2-2 0 0];
+            qtc(end+1,:)=[i1-2 i2-2 NaN NaN];
         end
     end
     for i1=1:3
@@ -60,7 +60,7 @@ elseif qtctype == 3
 end
 
 % Find valid transitions
-% Valid transitions are represented by a 1 in d; 0 or 2 are invalid
+% Valid transitions are represented by a 1 in d; <1 or >1 are invalid
 validqtc=[];
 d=zeros(cndsize,cndsize);
 for i1=1:size(qtc,1)
@@ -68,7 +68,11 @@ for i1=1:size(qtc,1)
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % self transition = 0, transition form - to + and vice versa = 2
         % transitions from - to 0 or + to 0 and vice versa = 1
-        d(i1+1,i2+1)=max(abs(qtc(i1,:)-qtc(i2,:)));
+        % Real self transitions are never checked due to the diag matrix
+        % approach. The ~=2 turns pseudo self-transitions between qtc_b
+        % and qtc_c into 1, turns illegal transitions into 0 and does not
+        % alter the behaviour for legal transitions.
+        d(i1+1,i2+1)=max(abs(qtc(i1,:)-qtc(i2,:)))~=2;
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % find invalid transitions according to CND:
@@ -85,7 +89,7 @@ for i1=1:size(qtc,1)
                             & sum(abs(qtc(i2,[j1,j2])))==1
                         if max(abs(qtc(i1,[j1,j2])-qtc(i2,[j1,j2]))) > 0 ...
                                 & sum(qtc(i1,[j1,j2])-qtc(i2,[j1,j2]))~=1
-                            d(i1+1,i2+1)=2;
+                            d(i1+1,i2+1)=5;
                             break;
                         end
                     end
