@@ -47,7 +47,10 @@ if strcmp(mode,'Kfold')
         disp('k = 5')
     end
     disp('---------------------------------------------------------------')
+    disp('Control HMM')
+    disp('---------------------------------------------------------------')
     hmm_control = qtcTrainHmm(cnd, control, type);
+    disp('---------------------------------------------------------------')
     p = [];
     for i=1:max(indices)
         disp(['Run: ',num2str(i)])

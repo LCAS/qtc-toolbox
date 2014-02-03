@@ -4,12 +4,16 @@ function [ seq ] = qtcCombinedSeq( qtc, skip )
 
 seq = [];
 
-if iscell(qtc)
-    if iscell(qtc{1}(1))
-        for j = 1:length(qtc)
-            seq{j} = qtcCombinedSeq( qtc{j}, skip );
+if iscell(qtc) & ~isempty(qtc)
+    if ~isempty(qtc{1})
+        if iscell(qtc{1}(1))
+            for j = 1:length(qtc)
+                seq{j} = qtcCombinedSeq( qtc{j}, skip );
+            end
+            return;
         end
-        return;
+    else
+        5
     end
 end
 if iscell(qtc)

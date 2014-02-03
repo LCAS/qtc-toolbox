@@ -113,7 +113,10 @@ for i=2:end_idx
         line_rl = line(RL_ext(:,1), RL_ext(:,2), 'Color', 'm');
         rl_l = line(trans_RL_h(:,1)', trans_RL_h(:,2)', 'Color', 'm');
         rl_r = line(trans_RL_r(:,1)', trans_RL_r(:,2)', 'Color', 'm');
-        title(['QTC_C state transition: (', num2str(qtcc_rep_tmp(end-1,:)), ') -> (',num2str(qtcc_rep_tmp(end,:)), ')']);
+        if size(qtcc_rep_tmp,1) > 1
+            title(['QTC_C state transition: (', num2str(qtcc_rep_tmp(end-1,:)), ...
+                ') -> (',num2str(qtcc_rep_tmp(end,:)), ')']);
+        end
         frames(i-1) = getframe;
         pause(0.01);
         delete(line_rl);
