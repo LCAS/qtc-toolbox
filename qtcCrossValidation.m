@@ -1,4 +1,4 @@
-function [ p ] = qtcCrossValidation( data_set, control, mode, type, KorP )
+function [ p ] = qtcCrossValidation( data_set1, data_set2, mode, type, KorP )
 %QTCCROSSVALIDATION
 %   Uses cross validation to evaluate the difference between the given
 %   DATA_SET and the CONTROL. Returns classification probabilities.
@@ -40,31 +40,44 @@ if strcmp(mode,'Kfold')
     disp('---------------------------------------------------------------')
     disp('K-fold crossvalidation')
     if nargin > 4
-        indices = crossvalind(mode, 1:length(data_set), KorP);
+        indices1 = crossvalind(mode, 1:length(data_set1), KorP);
+        indices2 = crossvalind(mode, 1:length(data_set2), KorP);
         disp(['k = ',num2str(KorP)])
     else
-        indices = crossvalind(mode, 1:length(data_set));
+        indices1 = crossvalind(mode, 1:length(data_set1));
+        indices2 = crossvalind(mode, 1:length(data_set2));
         disp('k = 5')
     end
-    disp('---------------------------------------------------------------')
-    disp('Control HMM')
-    disp('---------------------------------------------------------------')
-    hmm_control = qtcTrainHmm(cnd, control, type);
-    disp('---------------------------------------------------------------')
+    if max(indices1) ~= max(indices2)
+        error('qtc-toolbox:qtcCrossValidation:%s','Amount of training sets is not equal.')
+    end
     p = [];
-    for i=1:max(indices)
-        disp(['Run: ',num2str(i)])
+    disp('---------------------------------------------------------------')
+    for i=1:max(indices1)
+        disp(['Run: ',num2str(i),'/',num2str(max(indices1))])
         disp('---------------------------------------------------------------')
-        test_set = data_set(indices == i);
-        training_set = data_set(indices ~= i);
+        test_set1 = data_set1(indices1 == i);
+        training_set1 = data_set1(indices1 ~= i);
+        test_set2 = data_set2(indices2 == i);
+        training_set2 = data_set2(indices2 ~= i);
         
         % data
-        hmm_test=qtcTrainHmm(cnd, training_set, type);
-        res_test=qtcSeqDecode(hmm_test, test_set, type);
+        disp('---------------------------------------------------------------')
+        disp('Test set 1:')
+        disp('---------------------------------------------------------------')
+        hmm1=qtcTrainHmm(cnd, training_set1, type);
+        res1=qtcSeqDecode(hmm1, test_set1, type);
+        control1=qtcSeqDecode(hmm1, test_set2, type);
+        disp('---------------------------------------------------------------')
+        disp('Test set 2:')
+        disp('---------------------------------------------------------------')
+        hmm2=qtcTrainHmm(cnd, training_set2, type);
+        res2=qtcSeqDecode(hmm2, test_set2, type);
+        control2=qtcSeqDecode(hmm2, test_set1, type);
         
-        % control
-        res_control = qtcSeqDecode(hmm_control, test_set, type);
-        result = [[res_test.problog]' [res_control.problog]'];
+        % results
+        result = [[[res1.problog]' [control2.problog]']; ...
+           [[res2.problog]' [control1.problog]'] ];
         [m,idx]=max(result');
         p = [p, nnz(idx==1)/length(idx)];
         disp('---------------------------------------------------------------')
@@ -73,25 +86,25 @@ elseif strcmp(mode,'HoldOut')
     disp('---------------------------------------------------------------')
     disp('Hold-Out crossvalidation')
     if nargin > 4
-        [Train, Test] = crossvalind('HoldOut', length(data_set), KorP);
+        [Train, Test] = crossvalind('HoldOut', length(data_set1), KorP);
         disp(['p = ',num2str(KorP)])
     else
-        [Train, Test] = crossvalind('HoldOut', length(data_set));
+        [Train, Test] = crossvalind('HoldOut', length(data_set1));
         disp('p = 0.5')
     end
     disp('---------------------------------------------------------------')
-    test_set = data_set(Test);
-    training_set = data_set(Train);
+    test_set1 = data_set1(Test);
+    training_set1 = data_set1(Train);
 
     % data
-    hmm_control = qtcTrainHmm(cnd, control, type);
+    hmm_control = qtcTrainHmm(cnd, data_set2, type);
     p = [];
-    hmm_test=qtcTrainHmm(cnd, training_set, type);
-    res_test=qtcSeqDecode(hmm_test, test_set, type);
+    hmm1=qtcTrainHmm(cnd, training_set1, type);
+    res1=qtcSeqDecode(hmm1, test_set1, type);
 
     % control
-    res_control = qtcSeqDecode(hmm_control, test_set, type);
-    result = [[res_test.problog]' [res_control.problog]'];
+    res_control = qtcSeqDecode(hmm_control, test_set1, type);
+    result = [[res1.problog]' [res_control.problog]'];
     [m,idx]=max(result');
     p = [p, nnz(idx==1)/length(idx)];
     disp('---------------------------------------------------------------')
