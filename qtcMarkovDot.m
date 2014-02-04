@@ -1,6 +1,8 @@
-function [ output_args ] = qtcMarkovDot( hmm, th, type)
+function [ output_args ] = qtcMarkovDot( hmm, th, type, name)
     if nargin<4
         fn='tmp.dot';
+    else
+        fn=name;
     end;
     adj=hmm.t;
     %threshold it
